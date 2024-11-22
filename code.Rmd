@@ -1,0 +1,248 @@
+---
+title: "code"
+author: '111'
+date: "2024-11-14"
+output: html_document
+---
+
+```{r}
+# Install mirt package (if not already installed)
+install.packages("mirt")
+
+# Load the mirt package
+library(mirt)
+```
+
+```{r}
+install.packages("haven")
+```
+
+```{r}
+library(haven)
+data <- read_sav("/cloud/project/IRT/SWLS199studyvars.sav")
+```
+
+```{r}
+# View the first few rows of the data
+head(data)
+```
+
+```{r}
+library(dplyr)
+# Convert labelled columns to numeric
+data <- data %>%
+  mutate(across(starts_with("happy"), as.numeric))
+```
+
+```{r}
+str(data)
+summary(data)
+```
+
+```{r}
+# Fit Partial Credit Model (PCM)
+pcm_model <- mirt(data, model = 1, itemtype = "graded", SE = TRUE)
+summary(pcm_model)
+```
+
+```{r}
+rsm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], 
+                  model = 1, itemtype = "rsm", SE = TRUE)
+summary(rsm_model)
+```
+
+```{r}
+# Extract the item parameter estimates
+item_params_rsm <- coef(rsm_model, simplify = TRUE)
+
+# Print the estimates for inspection
+print(item_params_rsm)
+```
+
+#2
+```{r}
+# Fit the models (make sure the data is in the right format as described earlier)
+pcm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], model = 1, itemtype = "graded")
+rsm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], model = 1, itemtype = "rsm")
+gpcm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], model = 1, itemtype = "gpcm")
+# Fit the Graded Response Model
+grm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], model = 1, itemtype = "graded")
+```
+
+#3
+```{r}
+# Load the required package
+library(mirt)
+
+# Fit the Partial Credit Model (PCM)
+pcm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], 
+                  model = 1, itemtype = "graded")  # Use 'graded' for PCM
+
+# Fit the Rating Scale Model (RSM)
+rsm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], 
+                  model = 1, itemtype = "rsm")
+```
+
+```{r}
+# Extract the item fit statistics (including local dependence) for PCM
+pcm_itemfit <- itemfit(pcm_model)
+
+# Print the LD chi-square statistics for PCM
+print(pcm_itemfit)
+```
+
+```{r}
+# Extract the item fit statistics (including local dependence) for RSM
+rsm_itemfit <- itemfit(rsm_model)
+
+# Print the LD chi-square statistics for RSM
+print(rsm_itemfit)
+```
+
+#4
+```{r}
+# Load the necessary library
+library(mirt)
+
+# Fit the models using mirt
+pcm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], model = 1, itemtype = "graded")
+rsm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], model = 1, itemtype = "rsm")
+gpcm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], model = 1, itemtype = "gpcm")
+grm_model <- mirt(data[, c("happya", "happyb", "happyc", "happyd", "happye")], model = 1, itemtype = "graded")
+```
+
+```{r}
+# Extract threshold parameters for PCM
+pcm_thresholds <- coef(pcm_model, simplify = TRUE)$items[, 1:6]  # Get threshold parameters for each item
+print(pcm_thresholds)
+```
+
+```{r}
+# Extract threshold parameters for RSM
+rsm_thresholds <- coef(rsm_model, simplify = TRUE)$items[, 1:6]  # Get threshold parameters for each item
+print(rsm_thresholds)
+```
+
+```{r}
+# Extract threshold parameters for GPCM
+gpcm_thresholds <- coef(gpcm_model, simplify = TRUE)$items[, 1:6]  # Get threshold parameters for each item
+print(gpcm_thresholds)
+```
+
+```{r}
+# Extract threshold parameters for GRM
+grm_thresholds <- coef(grm_model, simplify = TRUE)$items[, 1:6]  # Get threshold parameters for each item
+print(grm_thresholds)
+```
+
+```{r}
+# Plot the Item Response Functions (ORFs) for PCM
+plot(pcm_model, type = "trace", items = 1:5)
+```
+
+```{r}
+# Plot the Item Response Functions (ORFs) for RSM
+plot(rsm_model, type = "trace", items = 1:5)  # Adjust the item numbers if needed
+```
+
+```{r}
+# Plot the Item Response Functions (ORFs) for GPCM
+plot(gpcm_model, type = "trace", items = 1:5)  # Adjust the item numbers if needed
+```
+
+```{r}
+# Plot the Item Response Functions (ORFs) for GRM
+plot(grm_model, type = "trace", items = 1:5)  # Adjust the item numbers if needed
+```
+
+#Part II
+```{r}
+# Install necessary packages
+install.packages("ltm")
+install.packages("mirt")
+
+# Load the libraries
+library(ltm)
+library(mirt)
+```
+
+```{r}
+# Load the dataset
+data <- read.table("/cloud/project/IRT/Anxiety.dat", header = TRUE)
+
+# Check the structure of the data
+str(data)
+```
+
+```{r}
+# Extract the responses from the second column
+responses <- as.character(data$X32223234323223)
+
+# Split the large numbers into individual digits (responses)
+split_responses <- strsplit(responses, "")
+
+# Convert the list of responses into a data frame
+response_matrix <- do.call(rbind, lapply(split_responses, function(x) as.numeric(x)))
+
+# Check the structure of the new response matrix
+str(response_matrix)
+
+# Create a new data frame with proper item names
+colnames(response_matrix) <- paste0("Item_", 1:ncol(response_matrix))
+response_df <- as.data.frame(response_matrix)
+
+# View the first few rows of the data
+head(response_df)
+```
+
+```{r}
+library(mirt)
+
+# Fit the Generalized Partial Credit Model (GPCM)
+gpcm_model <- mirt(response_df, 1, itemtype = 'gpcm')
+
+# View the summary of the GPCM model
+summary(gpcm_model)
+
+# Extract item parameter estimates (difficulties, discriminations, etc.)
+coef(gpcm_model)
+```
+
+```{r}
+# Fit the Graded Response Model (GRM)
+grm_model <- mirt(response_df, 1, itemtype = 'graded')
+
+# View the summary of the GRM model
+summary(grm_model)
+
+# Extract item parameter estimates (difficulties, discriminations, etc.)
+coef(grm_model)
+```
+
+```{r}
+# Plot ICC for the first item in the GPCM model
+plot(mirt::plot(gpcm_model, type = "trace", items = 1))
+
+# Plot ICC for the first item in the GRM model
+plot(mirt::plot(grm_model, type = "trace", items = 1))
+```
+
+```{r}
+# Check model fit for GPCM
+logLik(gpcm_model)  # Log-Likelihood
+AIC(gpcm_model)     # AIC
+BIC(gpcm_model)     # BIC
+
+# Check model fit for GRM
+logLik(grm_model)   # Log-Likelihood
+AIC(grm_model)      # AIC
+BIC(grm_model)      # BIC
+```
+
+
+
+
+
+
+
+
